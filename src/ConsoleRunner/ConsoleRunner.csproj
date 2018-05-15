@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net47</TargetFramework>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="LumenWorksCsvReader" Version="3.9.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Graylog.Target\Graylog.Target.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="comics.csv">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+</Project>

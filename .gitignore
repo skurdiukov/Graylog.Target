@@ -1,0 +1,14 @@
+bin
+obj
+StyleCop.Cache
+_ReSharper.Caches
+_TeamCity.*
+*.user
+*.suo
+*.~*
+.*
+
+!.nuget
+!.gitignore
+packages
+src/Sphere.Shared.Core/Sphere.Shared.Core.xml

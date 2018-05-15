@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RuleSet Name="Rules for StyleCop.Analyzers" Description="Code analysis rules for StyleCop.Analyzers.csproj." ToolsVersion="15.0">
+	<Rules AnalyzerId="Microsoft.Naming" RuleNamespace="Microsoft.Naming">
+		<Rule Id="CA1000" Action="Hidden" />
+		<Rule Id="CA1716" Action="Hidden" />
+		<Rule Id="CA1720" Action="Hidden" />
+	</Rules>
+	<Rules AnalyzerId="AsyncUsageAnalyzers" RuleNamespace="AsyncUsageAnalyzers">
+		<Rule Id="UseConfigureAwait" Action="Warning" />
+	</Rules>
+	<Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.Analyzers">
+		<Rule Id="SA0001" Action="Hidden" />
+		<Rule Id="SA1002" Action="Hidden" />
+		<Rule Id="SA1027" Action="Hidden" />
+		<Rule Id="SA1101" Action="Hidden" />
+		<Rule Id="SA1124" Action="Hidden" />
+		<Rule Id="SA1200" Action="Warning" />
+		<Rule Id="SA1309" Action="Hidden" />
+		<Rule Id="SA1407" Action="Hidden" />
+		<Rule Id="SA1503" Action="Hidden" />
+		<Rule Id="SA1623" Action="Hidden" />
+		<Rule Id="SA1633" Action="Hidden" />
+		<Rule Id="SA1642" Action="Hidden" />
+		<Rule Id="SA1652" Action="Hidden" />
+		<Rule Id="SX1101" Action="Warning" />
+	</Rules>
+</RuleSet>
