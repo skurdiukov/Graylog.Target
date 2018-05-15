@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -25,9 +26,14 @@ namespace Graylog.Target
 		private const int MaxMessageSizeInUdp = 8192;
 
 		/// <summary>
+		/// Message prefix size 12 bytes.
+		/// </summary>
+		private const int PrefixSize = 12;
+
+		/// <summary>
 		/// Chunk also contains 12 byte prefix, so 8192 - 12.
 		/// </summary>
-		private const int MaxMessageSizeInChunk = 8180;
+		private const int MaxMessageSizeInChunk = MaxMessageSizeInUdp - PrefixSize;
 
 		/// <summary>
 		/// Limitation from GrayLog2.
@@ -63,29 +69,48 @@ namespace Graylog.Target
 
 			if (compressedMessage.Length > MaxMessageSizeInUdp)
 			{
-				// Our compressed message is too big to fit in a single datagram. Need to chunk...
-				// https://github.com/Graylog2/graylog2-docs/wiki/GELF "Chunked GELF"
-				var numberOfChunksRequired = compressedMessage.Length / MaxMessageSizeInChunk + 1;
-				if (numberOfChunksRequired > MaxNumberOfChunksAllowed) return;
-
-				var messageId = GenerateMessageId(compressedMessage);
-
-				for (var i = 0; i < numberOfChunksRequired; i++)
-				{
-					var skip = i * MaxMessageSizeInChunk;
-					var messageChunkHeader = ConstructChunkHeader(messageId, i, numberOfChunksRequired);
-					var messageChunkData = compressedMessage.Skip(skip).Take(MaxMessageSizeInChunk).ToArray();
-
-					var messageChunkFull = new byte[messageChunkHeader.Length + messageChunkData.Length];
-					messageChunkHeader.CopyTo(messageChunkFull, 0);
-					messageChunkData.CopyTo(messageChunkFull, messageChunkHeader.Length);
-
-					_transportClient.Send(messageChunkFull, endpoint);
-				}
+				_transportClient.Send(CreateChunks(compressedMessage), endpoint);
 			}
 			else
 			{
-				_transportClient.Send(compressedMessage, endpoint);
+				_transportClient.Send(compressedMessage, compressedMessage.Length, endpoint);
+			}
+		}
+
+		/// <summary>
+		/// Create chunks from source message.
+		/// </summary>
+		/// <param name="message">Source message.</param>
+		/// <returns>Collection of chunks.</returns>
+		private static IEnumerable<byte[]> CreateChunks(byte[] message)
+		{
+			// Our compressed message is too big to fit in a single datagram. Need to chunk...
+			// https://github.com/Graylog2/graylog2-docs/wiki/GELF "Chunked GELF"
+			var numberOfChunksRequired = message.Length / MaxMessageSizeInChunk + 1;
+			if (numberOfChunksRequired > MaxNumberOfChunksAllowed)
+				yield break;
+
+			var messageId = GenerateMessageId(message);
+
+			var sendBuffer = new byte[MaxMessageSizeInUdp];
+			var header = ConstructChunkHeader(messageId, 0, numberOfChunksRequired);
+
+			header.CopyTo(sendBuffer, 0);
+
+			for (var i = 0; i < numberOfChunksRequired; i++)
+			{
+				var offset = i * MaxMessageSizeInChunk;
+				var chunkSize = Math.Min(MaxMessageSizeInChunk, message.Length - offset);
+				sendBuffer[10] = (byte)i;
+
+				if (sendBuffer.Length != PrefixSize + chunkSize)
+				{
+					Array.Resize(ref sendBuffer, PrefixSize + chunkSize);
+				}
+
+				Array.Copy(message, offset, sendBuffer, PrefixSize, chunkSize);
+
+				yield return sendBuffer;
 			}
 		}
 

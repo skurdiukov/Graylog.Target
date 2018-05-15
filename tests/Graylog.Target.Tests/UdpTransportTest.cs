@@ -1,6 +1,7 @@
 #region Usings
 
 using System;
+using System.Collections.Generic;
 using System.Net;
 
 using Graylog.Target.Tests.Resources;
@@ -23,7 +24,7 @@ namespace Graylog.Target.Tests
 	public class UdpTransportTest
 	{
 		/// <summary>
-		/// Тесты <see cref="ITransportClient.Send"/>
+		/// Тесты <see cref="ITransportClient"/>
 		/// </summary>
 		[TestFixture]
 		public class SendMethod
@@ -44,7 +45,7 @@ namespace Graylog.Target.Tests
 
 				target.WriteLogEventInfo(logEventInfo);
 
-				transportClient.Verify(t => t.Send(It.IsAny<byte[]>(), It.IsAny<IPEndPoint>()), Times.Once());
+				transportClient.Verify(t => t.Send(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<IPEndPoint>()), Times.Once());
 				converter.Verify(c => c.GetGelfJson(It.IsAny<LogEventInfo>(), It.IsAny<string>()), Times.Once());
 			}
 
@@ -63,14 +64,14 @@ namespace Graylog.Target.Tests
 				converter.Setup(c => c.GetGelfJson(It.IsAny<LogEventInfo>(), It.IsAny<string>())).Returns(jsonObject).Verifiable();
 
 				var transportClient = new Mock<ITransportClient>();
-				transportClient.Setup(t => t.Send(It.IsAny<byte[]>(), It.IsAny<IPEndPoint>())).Verifiable();
+				transportClient.Setup(t => t.Send(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<IPEndPoint>())).Verifiable();
 
 				var transport = new UdpTransport(transportClient.Object);
 
 				var target = new NLogTarget(transport, converter.Object) { HostIp = "127.0.0.1" };
 				target.WriteLogEventInfo(new LogEventInfo());
 
-				transportClient.Verify(t => t.Send(It.IsAny<byte[]>(), It.IsAny<IPEndPoint>()), Times.AtLeast(2));
+				transportClient.Verify(t => t.Send(It.IsAny<IEnumerable<byte[]>>(), It.IsAny<IPEndPoint>()), Times.Once);
 				converter.Verify(c => c.GetGelfJson(It.IsAny<LogEventInfo>(), It.IsAny<string>()), Times.Once());
 			}
 		}

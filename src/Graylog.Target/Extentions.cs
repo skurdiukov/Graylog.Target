@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace Graylog.Target
 {
@@ -20,6 +21,17 @@ namespace Graylog.Target
 		public static double ToUnixTimestamp(this DateTime date)
 		{
 			return (date.ToUniversalTime() - UnixEpoch).TotalMilliseconds / 1000;
+		}
+
+		/// <summary>
+		/// Yield single object as enumerable.
+		/// </summary>
+		/// <typeparam name="T">Object type.</typeparam>
+		/// <param name="obj">Object value.</param>
+		/// <returns>IEmumerable with single object.</returns>
+		public static IEnumerable<T> Yield<T>(T obj)
+		{
+			yield return obj;
 		}
 	}
 }

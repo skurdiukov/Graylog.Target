@@ -1,12 +1,11 @@
 using System;
 
 using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
 
 namespace Graylog.Target
 {
 	/// <summary>
-	/// Формат сообщения GELF.
+	/// GELF Payload Specification.
 	/// </summary>
 	/// <remarks>http://docs.graylog.org/en/2.4/pages/gelf.html</remarks>
 	[JsonObject(MemberSerialization.OptIn)]
