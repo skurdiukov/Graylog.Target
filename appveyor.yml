@@ -11,7 +11,7 @@ environment:
   BUILD_NUMBER: '%APPVEYOR_BUILD_NUMBER%'
 
 build_script:
-- cmd: dotnet build -c %configuration% -o ../../packages
+- cmd: dotnet build -c %configuration%
 
 test_script:
 - cmd: dotnet test -c %configuration% tests/Graylog.Target.Tests/Graylog.Target.Tests.csproj

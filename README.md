@@ -1,4 +1,4 @@
-# Graylog.Target ![http://teamcity.esphere.local/viewType.html?buildTypeId=mod_graylog_target_pack](http://teamcity.esphere.local/app/rest/builds/buildType:(id:mod_graylog_target_pack),branch:master/statusIcon.svg)
+# Graylog.Target ![https://ci.appveyor.com/project/skurdiukov/graylog-target](https://ci.appveyor.com/api/projects/status/skurdiukov/graylog-target/branch/master?svg=true)
 Graylog.Target is an [NLog] target implementation to push log messages to [GrayLog2]. It implements the [Gelf] specification and communicates with GrayLog server via UDP.
 
 ## Solution
