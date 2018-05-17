@@ -7,7 +7,7 @@ namespace Graylog.Target
 	/// <summary>
 	/// GELF Payload Specification.
 	/// </summary>
-	/// <remarks>http://docs.graylog.org/en/2.4/pages/gelf.html</remarks>
+	/// <remarks>See http://docs.graylog.org/en/2.4/pages/gelf.html.</remarks>
 	[JsonObject(MemberSerialization.OptIn)]
 	public class GelfMessage
 	{

@@ -120,7 +120,7 @@ namespace Graylog.Target
 		}
 
 		/// <summary>
-		/// Values from SyslogSeverity enum here: http://marc.info/?l=log4net-dev&amp;m=109519564630799
+		/// Values from SyslogSeverity enum here: http://marc.info/?l=log4net-dev&amp;m=109519564630799.
 		/// </summary>
 		/// <param name="level">Уровень логирования.</param>
 		/// <returns>Сконвертированный уровень логирования.</returns>
