@@ -1,0 +1,33 @@
+version: '{build}'
+image: Visual Studio 2017
+
+# build platform, i.e. x86, x64, Any CPU. This setting is optional.
+platform: Any CPU
+
+# build Configuration, i.e. Debug, Release, etc.
+configuration: Release
+
+environment:
+  BUILD_NUMBER: '%APPVEYOR_BUILD_NUMBER%'
+
+build_script:
+- cmd: dotnet build -c %configuration% -o ../../packages
+
+test_script:
+- cmd: dotnet test -c %configuration% tests/Graylog.Target.Tests/Graylog.Target.Tests.csproj
+
+after_test:
+- cmd: dotnet pack -c %configuration% -o ../../packages
+
+artifacts:
+- path: packages/*.nupkg
+  name: Packages
+
+deploy:
+- provider: NuGet
+  api_key:
+    secure: p4B3TD0THQhpN9Y05bHz0+NqJszuMGSZ2ONH2wNhHW4DJEBxp0cSw8zMJE2vH2f+
+  skip_symbols: true
+  artifact: Packages
+  on:
+    branch: master
