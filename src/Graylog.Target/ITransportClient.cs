@@ -18,14 +18,16 @@ namespace Graylog.Target
 		/// </summary>
 		/// <param name="datagram">The datagram.</param>
 		/// <param name="length">Size of send data.</param>
-		/// <param name="ipEndPoint">Target endpoint.</param>
-		void Send(byte[] datagram, int length, IPEndPoint ipEndPoint);
+		/// <param name="hostname">Target endpoint.</param>
+		/// <param name="port">Target port.</param>
+		void Send(byte[] datagram, int length, string hostname, int port);
 
 		/// <summary>
 		/// Send datagrams with UDP protocol.
 		/// </summary>
 		/// <param name="datagrams">The datagram.</param>
-		/// <param name="ipEndPoint">Target endpoint.</param>
-		void Send(IEnumerable<byte[]> datagrams, IPEndPoint ipEndPoint);
+		/// <param name="hostname">Target endpoint.</param>
+		/// <param name="port">Target port.</param>
+		void Send(IEnumerable<byte[]> datagrams, string hostname, int port);
 	}
 }

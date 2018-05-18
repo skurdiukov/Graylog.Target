@@ -6,16 +6,17 @@
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\build\project.snk</AssemblyOriginatorKeyFile>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
-    <Copyright>Copyright KORUS Consulting SNG 2013-2015</Copyright>
+    <Copyright>Copyright 2018</Copyright>
+    <Authors>skurdiukov</Authors>
     <PackageProjectUrl>https://github.com/skurdiukov/Graylog.Target</PackageProjectUrl>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/skurdiukov/Graylog.Target.git</RepositoryUrl>
     <Description>GELF 1.1 UDP target</Description>
-    <Version>1.1.0</Version>
-    <Build_Number Condition=" '$(Build_Number)' == '' ">0</Build_Number>
+    <Version>1.2.0</Version>
+    <BuildNumber Condition=" '$(BuildNumber)' == '' ">0</BuildNumber>
     <AssemblyVersion>1.0.0.0</AssemblyVersion>
-    <FileVersion>$(Version).$(Build_Number)</FileVersion>
-    <Features>IOperation</Features> 
+    <FileVersion>$(Version).$(BuildNumber)</FileVersion>
+    <Features>IOperation</Features>
     <WarningsAsErrors />
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageReleaseNotes>Support for GELF 1.1</PackageReleaseNotes>

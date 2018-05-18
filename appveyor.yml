@@ -8,10 +8,12 @@ platform: Any CPU
 configuration: Release
 
 environment:
-  BUILD_NUMBER: '%APPVEYOR_BUILD_NUMBER%'
+  BuildNumber: '%APPVEYOR_BUILD_NUMBER%'
+  RepositoryBranch: '%APPVEYOR_REPO_BRANCH%'
+  RepositoryCommit: '%APPVEYOR_REPO_COMMIT%'
 
 build_script:
-- cmd: dotnet build -c %configuration%
+- cmd: dotnet build
 
 test:
   assemblies:
@@ -19,7 +21,7 @@ test:
     - tests/**/*.Tests.dll
 
 after_test:
-- cmd: dotnet pack -c %configuration% -o ../../packages
+- cmd: dotnet pack -o ../../packages
 
 artifacts:
 - path: packages/*.nupkg

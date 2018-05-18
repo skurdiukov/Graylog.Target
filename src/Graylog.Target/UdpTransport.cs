@@ -62,18 +62,15 @@ namespace Graylog.Target
 		/// <param name="message">Message (in JSON) to log.</param>
 		public void Send(string serverIpAddress, int serverPort, string message)
 		{
-			var address = Dns.GetHostEntry(serverIpAddress).AddressList.First();
-			var endpoint = new IPEndPoint(address, serverPort);
-
 			var compressedMessage = CompressMessage(message);
 
 			if (compressedMessage.Length > MaxMessageSizeInUdp)
 			{
-				_transportClient.Send(CreateChunks(compressedMessage), endpoint);
+				_transportClient.Send(CreateChunks(compressedMessage), serverIpAddress, serverPort);
 			}
 			else
 			{
-				_transportClient.Send(compressedMessage, compressedMessage.Length, endpoint);
+				_transportClient.Send(compressedMessage, compressedMessage.Length, serverIpAddress, serverPort);
 			}
 		}
 

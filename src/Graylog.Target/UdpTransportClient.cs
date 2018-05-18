@@ -9,22 +9,22 @@ namespace Graylog.Target
 	public class UdpTransportClient : ITransportClient
 	{
 		/// <inheritdoc />
-		public void Send(byte[] datagram, int length, IPEndPoint ipEndPoint)
+		public void Send(byte[] datagram, int length, string hostname, int port)
 		{
 			using (var udpClient = new UdpClient())
 			{
-				udpClient.Send(datagram, length, ipEndPoint);
+				udpClient.Send(datagram, length, hostname, port);
 			}
 		}
 
 		/// <inheritdoc />
-		public void Send(IEnumerable<byte[]> datagrams, IPEndPoint ipEndPoint)
+		public void Send(IEnumerable<byte[]> datagrams, string hostname, int port)
 		{
 			using (var udpClient = new UdpClient())
 			{
 				foreach (var datagram in datagrams)
 				{
-					udpClient.Send(datagram, datagram.Length, ipEndPoint);
+					udpClient.Send(datagram, datagram.Length, hostname, port);
 				}
 			}
 		}
