@@ -18,8 +18,13 @@ namespace Graylog.Target
 	/// <summary>
 	/// Udp transport.
 	/// </summary>
-	public class UdpTransport : ITransport
+	internal sealed class UdpTransport : ITransport
 	{
+		/// <summary>
+		/// Chunk also contains 12 byte prefix, so 8192 - 12.
+		/// </summary>
+		internal const int MaxMessageSizeInChunk = MaxMessageSizeInUdp - PrefixSize;
+
 		/// <summary>
 		/// UDP datagrams are limited to a size of 8192 bytes.
 		/// </summary>
@@ -29,11 +34,6 @@ namespace Graylog.Target
 		/// Message prefix size 12 bytes.
 		/// </summary>
 		private const int PrefixSize = 12;
-
-		/// <summary>
-		/// Chunk also contains 12 byte prefix, so 8192 - 12.
-		/// </summary>
-		private const int MaxMessageSizeInChunk = MaxMessageSizeInUdp - PrefixSize;
 
 		/// <summary>
 		/// Limitation from GrayLog2.
@@ -79,11 +79,11 @@ namespace Graylog.Target
 		/// </summary>
 		/// <param name="message">Source message.</param>
 		/// <returns>Collection of chunks.</returns>
-		private static IEnumerable<byte[]> CreateChunks(byte[] message)
+		internal static IEnumerable<byte[]> CreateChunks(byte[] message)
 		{
 			// Our compressed message is too big to fit in a single datagram. Need to chunk...
 			// https://github.com/Graylog2/graylog2-docs/wiki/GELF "Chunked GELF"
-			var numberOfChunksRequired = message.Length / MaxMessageSizeInChunk + 1;
+			var numberOfChunksRequired = (message.Length - 1) / MaxMessageSizeInChunk + 1;
 			if (numberOfChunksRequired > MaxNumberOfChunksAllowed)
 				yield break;
 

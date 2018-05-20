@@ -1,30 +1,24 @@
-#region Usings
-
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 
+using FluentAssertions;
 using Graylog.Target.Tests.Resources;
-
 using Moq;
-
 using Newtonsoft.Json.Linq;
-
 using NLog;
-
 using NUnit.Framework;
-
-#endregion
 
 namespace Graylog.Target.Tests
 {
 	/// <summary>
-	/// Тесты <see cref="ITransportClient"/>
+	/// Tests for <see cref="ITransportClient"/>.
 	/// </summary>
 	public class UdpTransportTest
 	{
 		/// <summary>
-		/// Тесты <see cref="ITransportClient"/>
+		/// Tests for <see cref="UdpTransport"/>.
 		/// </summary>
 		[TestFixture]
 		public class SendMethod
@@ -73,6 +67,29 @@ namespace Graylog.Target.Tests
 
 				transportClient.Verify(t => t.Send(It.IsAny<IEnumerable<byte[]>>(), It.IsAny<string>(), It.IsAny<int>()), Times.Once);
 				converter.Verify(c => c.GetGelfJson(It.IsAny<LogEventInfo>(), It.IsAny<string>()), Times.Once());
+			}
+		}
+
+		/// <summary>
+		/// Tests for <see cref="UdpTransport.CreateChunks" />.
+		/// </summary>
+		[TestFixture]
+		public class CreateChunks
+		{
+			[TestCase(UdpTransport.MaxMessageSizeInChunk, 1)]
+			[TestCase(UdpTransport.MaxMessageSizeInChunk - 1, 1)]
+			[TestCase(UdpTransport.MaxMessageSizeInChunk + 1, 2)]
+			[TestCase(UdpTransport.MaxMessageSizeInChunk * 2, 2)]
+			public void AmountOfChunksTest(int bufferLength, int expectendChunksCount)
+			{
+				// arrange
+				var buffer = new byte[bufferLength];
+
+				// act
+				var chunksCount = UdpTransport.CreateChunks(buffer).Count();
+
+				// assert
+				chunksCount.Should().Be(expectendChunksCount);
 			}
 		}
 	}
