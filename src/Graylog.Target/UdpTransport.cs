@@ -3,6 +3,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -162,7 +163,8 @@ namespace Graylog.Target
 		/// - First 42 bits of MD5 hash of compressed message.
 		/// </summary>
 		/// <param name="compressedMessage">Compressed message.</param>
-		/// <returns>Byte arraye with uniqueue id of message.</returns>
+		/// <returns>Byte array with unique id of message.</returns>
+		[SuppressMessage("Security", "CA5351", Justification = "Not used in secure reasons")]
 		private static byte[] GenerateMessageId(byte[] compressedMessage)
 		{
 			// create a bit array to store the entire message id (which is 8 bytes)

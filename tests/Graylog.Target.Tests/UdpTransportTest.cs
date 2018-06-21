@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 
 using FluentAssertions;
 using Graylog.Target.Tests.Resources;
@@ -24,7 +23,7 @@ namespace Graylog.Target.Tests
 		public class SendMethod
 		{
 			/// <summary>
-			/// Отправка короткого сообщения.
+			/// Short message send test.
 			/// </summary>
 			[Test]
 			public void ShouldSendShortUdpMessage()
@@ -76,11 +75,16 @@ namespace Graylog.Target.Tests
 		[TestFixture]
 		public class CreateChunks
 		{
+			/// <summary>
+			/// Test for creating proper amount of chunks.
+			/// </summary>
+			/// <param name="bufferLength">Source buffer length.</param>
+			/// <param name="expectedChunksCount">Expected chunks count.</param>
 			[TestCase(UdpTransport.MaxMessageSizeInChunk, 1)]
 			[TestCase(UdpTransport.MaxMessageSizeInChunk - 1, 1)]
 			[TestCase(UdpTransport.MaxMessageSizeInChunk + 1, 2)]
 			[TestCase(UdpTransport.MaxMessageSizeInChunk * 2, 2)]
-			public void AmountOfChunksTest(int bufferLength, int expectendChunksCount)
+			public void AmountOfChunksTest(int bufferLength, int expectedChunksCount)
 			{
 				// arrange
 				var buffer = new byte[bufferLength];
@@ -89,7 +93,7 @@ namespace Graylog.Target.Tests
 				var chunksCount = UdpTransport.CreateChunks(buffer).Count();
 
 				// assert
-				chunksCount.Should().Be(expectendChunksCount);
+				chunksCount.Should().Be(expectedChunksCount);
 			}
 		}
 	}
