@@ -25,6 +25,7 @@ namespace Graylog.Target.Tests
 		[Test]
 		public void ShouldCreateGelfJsonCorrectly()
 		{
+			// arrange
 			var timestamp = DateTime.Now;
 			var logEvent = new LogEventInfo
 			{
@@ -36,20 +37,22 @@ namespace Graylog.Target.Tests
 			logEvent.Properties.Add("customproperty1", "customvalue1");
 			logEvent.Properties.Add("customproperty2", "customvalue2");
 
+			// act
 			var jsonObject = new GelfConverter().GetGelfJson(logEvent, "TestFacility");
 
+			// assert
 			jsonObject.Should().NotBeNull();
-			Assert.AreEqual("1.1", jsonObject.Value<string>("version"));
-			Assert.AreEqual(Dns.GetHostName(), jsonObject.Value<string>("host"));
-			Assert.AreEqual("Test Log Message", jsonObject.Value<string>("short_message"));
-			Assert.AreEqual("Test Log Message", jsonObject.Value<string>("full_message"));
-			Assert.AreEqual(timestamp.ToUnixTimestamp(), jsonObject.Value<double>("timestamp"));
-			Assert.AreEqual(5, jsonObject.Value<int>("level"));
+			jsonObject.Value<string>("version").Should().Be("1.1");
+			jsonObject.Value<string>("host").Should().Be(Dns.GetHostName());
+			jsonObject.Value<string>("short_message").Should().Be("Test Log Message");
+			jsonObject.Value<string>("full_message").Should().Be("Test Log Message");
+			jsonObject.Value<double>("timestamp").Should().Be(timestamp.ToUnixTimestamp());
+			jsonObject.Value<int>("level").Should().Be(5);
 
-			Assert.AreEqual("TestFacility", jsonObject.Value<string>("_facility"));
-			Assert.AreEqual("customvalue1", jsonObject.Value<string>("_customproperty1"));
-			Assert.AreEqual("customvalue2", jsonObject.Value<string>("_customproperty2"));
-			Assert.AreEqual("GelfConverterTestLogger", jsonObject.Value<string>("_LoggerName"));
+			jsonObject.Value<string>("_facility").Should().Be("TestFacility");
+			jsonObject.Value<string>("_customproperty1").Should().Be("customvalue1");
+			jsonObject.Value<string>("_customproperty2").Should().Be("customvalue2");
+			jsonObject.Value<string>("_LoggerName").Should().Be("GelfConverterTestLogger");
 
 			// make sure that there are no other junk in there
 			jsonObject.Should().HaveCount(10);
@@ -61,24 +64,27 @@ namespace Graylog.Target.Tests
 		[Test]
 		public void ShouldHandleExceptionsCorrectly()
 		{
+			// arrange
 			var logEvent = new LogEventInfo
 			{
 				Message = "Test Message",
 				Exception = new DivideByZeroException("div by 0"),
 			};
 
+			// act
 			var jsonObject = new GelfConverter().GetGelfJson(logEvent, "TestFacility");
 
-			Assert.IsNotNull(jsonObject);
-			Assert.AreEqual("Test Message", jsonObject.Value<string>("short_message"));
-			Assert.AreEqual("Test Message", jsonObject.Value<string>("full_message"));
-			Assert.AreEqual(3, jsonObject.Value<int>("level"));
-			Assert.AreEqual("TestFacility", jsonObject.Value<string>("_facility"));
-			Assert.AreEqual(null, jsonObject.Value<string>("_ExceptionSource"));
-			Assert.AreEqual("System.DivideByZeroException", jsonObject.Value<string>("_Exception.0.Type"));
-			Assert.AreEqual("div by 0", jsonObject.Value<string>("_Exception.0.Message"));
-			Assert.AreEqual(null, jsonObject.Value<string>("_Exception.0.StackTrace"));
-			Assert.AreEqual(null, jsonObject.Value<string>("_LoggerName"));
+			// assert
+			jsonObject.Should().NotBeNull();
+			jsonObject.Value<string>("short_message").Should().Be("Test Message");
+			jsonObject.Value<string>("full_message").Should().Be("Test Message");
+			jsonObject.Value<int>("level").Should().Be(3);
+			jsonObject.Value<string>("_facility").Should().Be("TestFacility");
+			jsonObject.Value<string>("_ExceptionSource").Should().Be(null);
+			jsonObject.Value<string>("_Exception.0.Type").Should().Be(typeof(DivideByZeroException).FullName);
+			jsonObject.Value<string>("_Exception.0.Message").Should().Be("div by 0");
+			jsonObject.Value<string>("_Exception.0.StackTrace").Should().Be(null);
+			jsonObject.Value<string>("_LoggerName").Should().Be(null);
 		}
 
 		/// <summary>
@@ -87,17 +93,20 @@ namespace Graylog.Target.Tests
 		[Test]
 		public void ShouldHandleNestedExceptionCorrectly()
 		{
+			// arrange
 			var logEvent = new LogEventInfo
 			{
 				Message = "Test Message",
 				Exception = new AggregateException("div by 0", new Exception("Nested exception")),
 			};
 
+			// act
 			var jsonObject = new GelfConverter().GetGelfJson(logEvent, "TestFacility");
 
-			Assert.IsNotNull(jsonObject);
-			Assert.AreEqual("System.Exception", jsonObject.Value<string>("_Exception.1.Type"));
-			Assert.AreEqual("Nested exception", jsonObject.Value<string>("_Exception.1.Message"));
+			// assert
+			jsonObject.Should().NotBeNull();
+			jsonObject.Value<string>("_Exception.1.Type").Should().Be(typeof(Exception).FullName);
+			jsonObject.Value<string>("_Exception.1.Message").Should().Be("Nested exception");
 		}
 
 		/// <summary>
@@ -106,17 +115,20 @@ namespace Graylog.Target.Tests
 		[Test]
 		public void ShouldHandleLongMessageCorrectly()
 		{
+			// arrange
 			var logEvent = new LogEventInfo
 			{
 				// The first 300 chars of lorem ipsum...
 				Message = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus interdum est in est cursus vitae pellentesque felis lobortis. Donec a orci quis ante viverra eleifend ac et quam. Donec imperdiet libero ut justo tincidunt non tristique mauris gravida. Fusce sapien eros, tincidunt a placerat nullam.",
 			};
 
+			// act
 			var jsonObject = new GelfConverter().GetGelfJson(logEvent, "TestFacility");
 
-			Assert.IsNotNull(jsonObject);
-			Assert.AreEqual(250, jsonObject.Value<string>("short_message").Length);
-			Assert.AreEqual(300, jsonObject.Value<string>("full_message").Length);
+			// assert
+			jsonObject.Should().NotBeNull();
+			jsonObject.Value<string>("short_message").Length.Should().Be(250);
+			jsonObject.Value<string>("full_message").Length.Should().Be(300);
 		}
 	}
 }

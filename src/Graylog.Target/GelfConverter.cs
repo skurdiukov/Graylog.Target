@@ -113,7 +113,7 @@ namespace Graylog.Target
 			if (!(property.Key is string key) || property.Value == null) return;
 
 			// According to the GELF spec, additional field keys should start with '_' to avoid collision
-			if (!key.StartsWith("_", StringComparison.OrdinalIgnoreCase))
+			if (!key.StartsWith("_", StringComparison.Ordinal))
 				key = "_" + key;
 
 			jObject.Add(key, JToken.FromObject(property.Value));

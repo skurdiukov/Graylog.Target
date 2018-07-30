@@ -5,7 +5,7 @@
     <IsPackable>false</IsPackable>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="LumenWorksCsvReader" Version="3.9.1" />
+    <PackageReference Include="LumenWorksCsvReader" Version="4.0.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Graylog.Target\Graylog.Target.csproj" />
