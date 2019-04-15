@@ -130,5 +130,25 @@ namespace Graylog.Target.Tests
 			jsonObject.Value<string>("short_message").Length.Should().Be(250);
 			jsonObject.Value<string>("full_message").Length.Should().Be(300);
 		}
+
+		/// <summary>
+		/// Object conversion should not change original object.
+		/// </summary>
+		[Test]
+		public void ShouldNotChangeLogEvent()
+		{
+			// arrange
+			var logEvent = new LogEventInfo
+			{
+				Message = "Message",
+			};
+
+			// act
+			var jsonObject1 = new GelfConverter().GetGelfJson(logEvent, "TestFacility");
+			var jsonObject2 = new GelfConverter().GetGelfJson(logEvent, "TestFacility");
+
+			// assert
+			jsonObject1.Should().BeEquivalentTo(jsonObject2);
+		}
 	}
 }

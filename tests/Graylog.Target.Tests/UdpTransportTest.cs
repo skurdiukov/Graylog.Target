@@ -33,7 +33,7 @@ namespace Graylog.Target.Tests
 				var converter = new Mock<IConverter>();
 				converter.Setup(c => c.GetGelfJson(It.IsAny<LogEventInfo>(), It.IsAny<string>())).Returns(new JObject());
 
-				var target = new NLogTarget(transport, converter.Object) { HostIp = "127.0.0.1" };
+				var target = new GraylogTarget(transport, converter.Object) { HostIp = "127.0.0.1" };
 				var logEventInfo = new LogEventInfo { Message = "Test Message" };
 
 				target.WriteLogEventInfo(logEventInfo);
@@ -61,7 +61,7 @@ namespace Graylog.Target.Tests
 
 				var transport = new UdpTransport(transportClient.Object);
 
-				var target = new NLogTarget(transport, converter.Object) { HostIp = "127.0.0.1" };
+				var target = new GraylogTarget(transport, converter.Object) { HostIp = "127.0.0.1" };
 				target.WriteLogEventInfo(new LogEventInfo());
 
 				transportClient.Verify(t => t.Send(It.IsAny<IEnumerable<byte[]>>(), It.IsAny<string>(), It.IsAny<int>()), Times.Once);

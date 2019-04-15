@@ -45,7 +45,7 @@ namespace Graylog.Target
 		{
 			// Retrieve the formatted message from LogEventInfo
 			var logEventMessage = logEventInfo.FormattedMessage;
-			var properties = logEventInfo.Properties;
+			var properties = new Dictionary<object, object>(logEventInfo.Properties);
 
 			if (logEventMessage == null) return null;
 
@@ -122,8 +122,8 @@ namespace Graylog.Target
 		/// <summary>
 		/// Values from SyslogSeverity enum here: http://marc.info/?l=log4net-dev&amp;m=109519564630799.
 		/// </summary>
-		/// <param name="level">Уровень логирования.</param>
-		/// <returns>Сконвертированный уровень логирования.</returns>
+		/// <param name="level">Log level.</param>
+		/// <returns>Mapper log level.</returns>
 		private static int GetSeverityLevel(LogLevel level)
 		{
 			return level == null || !LevelMap.ContainsKey(level) ? 3 : LevelMap[level];

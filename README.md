@@ -1,6 +1,8 @@
 # Graylog.Target
 
-[![AppVeyor](https://img.shields.io/appveyor/ci/skurdiukov/graylog-target/master.svg)](https://ci.appveyor.com/project/skurdiukov/graylog-target) [![AppVeyor tests](https://img.shields.io/appveyor/tests/skurdiukov/graylog-target/master.svg)](https://ci.appveyor.com/project/skurdiukov/graylog-target) [![NuGet](https://img.shields.io/nuget/v/Graylog.Target.svg)](https://www.nuget.org/packages/Graylog.Target/)
+[![AppVeyor](https://img.shields.io/appveyor/ci/skurdiukov/graylog-target/master.svg)](https://ci.appveyor.com/project/skurdiukov/graylog-target)
+[![AppVeyor tests](https://img.shields.io/appveyor/tests/skurdiukov/graylog-target/master.svg)](https://ci.appveyor.com/project/skurdiukov/graylog-target) [![NuGet](https://img.shields.io/nuget/v/Graylog.Target.svg)](https://www.nuget.org/packages/Graylog.Target/)
+[![BCH compliance](https://bettercodehub.com/edge/badge/skurdiukov/Graylog.Target?branch=master)](https://bettercodehub.com/)
 
 Graylog.Target is an [NLog] target implementation to push log messages to [GrayLog2]. It implements the [Gelf] specification and communicates with GrayLog server via UDP.
 
