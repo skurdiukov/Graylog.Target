@@ -58,10 +58,10 @@ namespace Graylog.Target
 				do
 				{
 					var prefix = $"Exception.{exceptionLevel++}.";
-					properties.Add(prefix + "Type", exception.GetType().FullName);
-					properties.Add(prefix + "Source", exception.Source);
-					properties.Add(prefix + "Message", exception.Message);
-					properties.Add(prefix + "StackTrace", exception.StackTrace);
+					properties[prefix + "Type"] = exception.GetType().FullName;
+					properties[prefix + "Source"] = exception.Source;
+					properties[prefix + "Message"] = exception.Message;
+					properties[prefix + "StackTrace"] = exception.StackTrace;
 
 					exception = exception.InnerException;
 				}
@@ -91,8 +91,8 @@ namespace Graylog.Target
 			var jsonObject = JObject.FromObject(gelfMessage);
 
 			// Add any other interesting data to LogEventInfo properties
-			properties.Add("LoggerName", logEventInfo.LoggerName);
-			properties.Add("facility", facility);
+			properties["LoggerName"] = logEventInfo.LoggerName;
+			properties["facility"] = facility;
 
 			// We will persist them "Additional Fields" according to Gelf spec
 			foreach (var property in properties)
@@ -116,7 +116,7 @@ namespace Graylog.Target
 			if (!key.StartsWith("_", StringComparison.Ordinal))
 				key = "_" + key;
 
-			jObject.Add(key, JToken.FromObject(property.Value));
+			jObject[key] = JToken.FromObject(property.Value);
 		}
 
 		/// <summary>
