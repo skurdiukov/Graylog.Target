@@ -41,11 +41,19 @@ namespace Graylog.Target
 		};
 
 		/// <inheritdoc/>
-		public JObject GetGelfJson(LogEventInfo logEventInfo, string facility)
+		public JObject GetGelfJson(LogEventInfo logEventInfo, string facility, bool includeMdlcProperties)
 		{
 			// Retrieve the formatted message from LogEventInfo
 			var logEventMessage = logEventInfo.FormattedMessage;
 			var properties = new Dictionary<object, object>(logEventInfo.Properties);
+
+			if (includeMdlcProperties)
+			{
+				foreach (var propertyName in MappedDiagnosticsLogicalContext.GetNames())
+				{
+					properties[propertyName] = MappedDiagnosticsLogicalContext.GetObject(propertyName);
+				}
+			}
 
 			if (logEventMessage == null) return null;
 

@@ -31,7 +31,7 @@ namespace Graylog.Target.Tests
 				var transportClient = new Mock<ITransportClient>();
 				var transport = new UdpTransport(transportClient.Object);
 				var converter = new Mock<IConverter>();
-				converter.Setup(c => c.GetGelfJson(It.IsAny<LogEventInfo>(), It.IsAny<string>())).Returns(new JObject());
+				converter.Setup(c => c.GetGelfJson(It.IsAny<LogEventInfo>(), It.IsAny<string>(), false)).Returns(new JObject());
 
 				var target = new GraylogTarget(transport, converter.Object) { HostIp = "127.0.0.1" };
 				var logEventInfo = new LogEventInfo { Message = "Test Message" };
@@ -39,7 +39,7 @@ namespace Graylog.Target.Tests
 				target.WriteLogEventInfo(logEventInfo);
 
 				transportClient.Verify(t => t.Send(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<string>(), It.IsAny<int>()), Times.Once());
-				converter.Verify(c => c.GetGelfJson(It.IsAny<LogEventInfo>(), It.IsAny<string>()), Times.Once());
+				converter.Verify(c => c.GetGelfJson(It.IsAny<LogEventInfo>(), It.IsAny<string>(), false), Times.Once());
 			}
 
 			/// <summary>
@@ -54,7 +54,7 @@ namespace Graylog.Target.Tests
 				jsonObject.Add("full_message", JToken.FromObject(message));
 
 				var converter = new Mock<IConverter>();
-				converter.Setup(c => c.GetGelfJson(It.IsAny<LogEventInfo>(), It.IsAny<string>())).Returns(jsonObject).Verifiable();
+				converter.Setup(c => c.GetGelfJson(It.IsAny<LogEventInfo>(), It.IsAny<string>(), false)).Returns(jsonObject).Verifiable();
 
 				var transportClient = new Mock<ITransportClient>();
 				transportClient.Setup(t => t.Send(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<string>(), It.IsAny<int>())).Verifiable();
@@ -65,7 +65,7 @@ namespace Graylog.Target.Tests
 				target.WriteLogEventInfo(new LogEventInfo());
 
 				transportClient.Verify(t => t.Send(It.IsAny<IEnumerable<byte[]>>(), It.IsAny<string>(), It.IsAny<int>()), Times.Once);
-				converter.Verify(c => c.GetGelfJson(It.IsAny<LogEventInfo>(), It.IsAny<string>()), Times.Once());
+				converter.Verify(c => c.GetGelfJson(It.IsAny<LogEventInfo>(), It.IsAny<string>(), false), Times.Once());
 			}
 		}
 

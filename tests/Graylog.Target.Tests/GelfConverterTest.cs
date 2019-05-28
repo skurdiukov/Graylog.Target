@@ -1,15 +1,13 @@
-#region Usings
-
 using System;
 using System.Net;
 
 using FluentAssertions;
 
+using Newtonsoft.Json.Linq;
+
 using NLog;
 
 using NUnit.Framework;
-
-#endregion
 
 namespace Graylog.Target.Tests
 {
@@ -38,7 +36,7 @@ namespace Graylog.Target.Tests
 			logEvent.Properties.Add("customproperty2", "customvalue2");
 
 			// act
-			var jsonObject = new GelfConverter().GetGelfJson(logEvent, "TestFacility");
+			var jsonObject = new GelfConverter().GetGelfJson(logEvent, "TestFacility", false);
 
 			// assert
 			jsonObject.Should().NotBeNull();
@@ -72,7 +70,7 @@ namespace Graylog.Target.Tests
 			};
 
 			// act
-			var jsonObject = new GelfConverter().GetGelfJson(logEvent, "TestFacility");
+			var jsonObject = new GelfConverter().GetGelfJson(logEvent, "TestFacility", false);
 
 			// assert
 			jsonObject.Should().NotBeNull();
@@ -101,7 +99,7 @@ namespace Graylog.Target.Tests
 			};
 
 			// act
-			var jsonObject = new GelfConverter().GetGelfJson(logEvent, "TestFacility");
+			var jsonObject = new GelfConverter().GetGelfJson(logEvent, "TestFacility", false);
 
 			// assert
 			jsonObject.Should().NotBeNull();
@@ -123,7 +121,7 @@ namespace Graylog.Target.Tests
 			};
 
 			// act
-			var jsonObject = new GelfConverter().GetGelfJson(logEvent, "TestFacility");
+			var jsonObject = new GelfConverter().GetGelfJson(logEvent, "TestFacility", false);
 
 			// assert
 			jsonObject.Should().NotBeNull();
@@ -144,11 +142,35 @@ namespace Graylog.Target.Tests
 			};
 
 			// act
-			var jsonObject1 = new GelfConverter().GetGelfJson(logEvent, "TestFacility");
-			var jsonObject2 = new GelfConverter().GetGelfJson(logEvent, "TestFacility");
+			var jsonObject1 = new GelfConverter().GetGelfJson(logEvent, "TestFacility", false);
+			var jsonObject2 = new GelfConverter().GetGelfJson(logEvent, "TestFacility", false);
 
 			// assert
 			jsonObject1.Should().BeEquivalentTo(jsonObject2);
+		}
+
+		/// <summary>
+		/// <see cref="MappedDiagnosticsLogicalContext"/> properties should be included into event.
+		/// </summary>
+		[Test]
+		public void ShouldIncludeMdlcProperties()
+		{
+			// arrange
+			var logEvent = new LogEventInfo
+			{
+				Message = "Message",
+			};
+
+			// act
+			JObject jsonObject;
+			using (MappedDiagnosticsLogicalContext.SetScoped("mdlcItem", "value1"))
+			{
+				jsonObject = new GelfConverter().GetGelfJson(logEvent, "TestFacility", true);
+			}
+
+			// assert
+			jsonObject.Should().NotBeNull();
+			jsonObject.Value<string>("_mdlcItem").Should().Be("value1");
 		}
 	}
 }

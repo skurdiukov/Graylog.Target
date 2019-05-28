@@ -2,6 +2,10 @@
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0]
+### Added
+- `MappedDiagnosticsLogicalContext` can be included into message if `IncludeMdlcProperties` set.
+
 ## [1.2.1]
 ### Changed
 - Fixed bug, when second convertion of same message failed with exception.

@@ -49,6 +49,11 @@ namespace Graylog.Target
 		public string Facility { get; set; }
 
 		/// <summary>
+		/// If <c>true</c> include <see cref="MappedDiagnosticsLogicalContext"/> properties into message.
+		/// </summary>
+		public bool IncludeMdlcProperties { get; set; } = false;
+
+		/// <summary>
 		/// Message converter.
 		/// </summary>
 		public IConverter Converter { get; }
@@ -73,7 +78,7 @@ namespace Graylog.Target
 		/// <param name="logEvent">Log event to be written out.</param>
 		protected override void Write(LogEventInfo logEvent)
 		{
-			var jsonObject = Converter.GetGelfJson(logEvent, Facility);
+			var jsonObject = Converter.GetGelfJson(logEvent, Facility, IncludeMdlcProperties);
 			if (jsonObject == null) return;
 			Transport.Send(HostIp, HostPort, jsonObject.ToString(Formatting.None, null));
 		}
