@@ -20,6 +20,9 @@ namespace Graylog.Target
 		/// <inheritdoc />
 		public void Send(IEnumerable<byte[]> datagrams, string hostname, int port)
 		{
+			if (datagrams == null)
+				throw new ArgumentNullException(nameof(datagrams));
+
 			using (var udpClient = new UdpClient())
 			{
 				foreach (var datagram in datagrams)

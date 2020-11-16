@@ -163,8 +163,8 @@ namespace Graylog.Target
 		/// - First 42 bits of MD5 hash of compressed message.
 		/// </summary>
 		/// <param name="compressedMessage">Compressed message.</param>
-		/// <returns>Byte array with unique id of message.</returns>
-		[SuppressMessage("Security", "CA5351", Justification = "Not used in secure reasons")]
+		/// <returns>Byte arrays with unique id of message.</returns>
+		[SuppressMessage("Security", "CA5351:Do Not Use Broken Cryptographic Algorithms", Justification = "Required by GELF")]
 		private static byte[] GenerateMessageId(byte[] compressedMessage)
 		{
 			// create a bit array to store the entire message id (which is 8 bytes)
@@ -188,6 +188,7 @@ namespace Graylog.Target
 
 			// generate the MD5 hash of the compressed message
 			byte[] hashOfCompressedMessage;
+
 			using (var md5 = MD5.Create())
 			{
 				hashOfCompressedMessage = md5.ComputeHash(compressedMessage);

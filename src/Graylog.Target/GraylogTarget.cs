@@ -51,7 +51,7 @@ namespace Graylog.Target
 		/// <summary>
 		/// If <c>true</c> include <see cref="MappedDiagnosticsLogicalContext"/> properties into message.
 		/// </summary>
-		public bool IncludeMdlcProperties { get; set; } = false;
+		public bool IncludeMdlcProperties { get; set; }
 
 		/// <summary>
 		/// Message converter.

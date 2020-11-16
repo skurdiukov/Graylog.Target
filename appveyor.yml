@@ -1,5 +1,5 @@
 version: '{build}'
-image: Visual Studio 2019
+image: Ubuntu2004
 
 # build platform, i.e. x86, x64, Any CPU. This setting is optional.
 platform: Any CPU
@@ -21,17 +21,17 @@ test:
     - tests/**/*.Tests.dll
 
 after_test:
-- cmd: dotnet pack -o ../../packages
+- cmd: dotnet pack -o ./packages
 
 artifacts:
 - path: packages/*.nupkg
-  name: Packages
+  name: packages
 
 deploy:
 - provider: NuGet
   api_key:
     secure: kjhKEgtGi26pGBlQnvDdH1nv/Ijyf3+OvyqSUvwd5KjJsg7xLQ1iSeDemGRE6g1m
   skip_symbols: true
-  artifact: Packages
+  artifact: packages
   on:
     branch: master

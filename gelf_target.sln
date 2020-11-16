@@ -17,6 +17,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "root", "root", "{6E2C33C9-F
 		appveyor.yml = appveyor.yml
 		CHANGELOG.md = CHANGELOG.md
 		README.md = README.md
+		.editorconfig = .editorconfig
+		.gitignore = .gitignore
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{97B39EEA-7D0F-4476-A1F9-C3F9A492A295}"

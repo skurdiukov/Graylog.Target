@@ -2,11 +2,9 @@ using System;
 using System.Net;
 
 using FluentAssertions;
-
 using Newtonsoft.Json.Linq;
 
 using NLog;
-
 using NUnit.Framework;
 
 namespace Graylog.Target.Tests
@@ -117,7 +115,7 @@ namespace Graylog.Target.Tests
 			var logEvent = new LogEventInfo
 			{
 				// The first 300 chars of lorem ipsum...
-				Message = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus interdum est in est cursus vitae pellentesque felis lobortis. Donec a orci quis ante viverra eleifend ac et quam. Donec imperdiet libero ut justo tincidunt non tristique mauris gravida. Fusce sapien eros, tincidunt a placerat nullam.",
+				Message = @"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus interdum est in est cursus vitae pellentesque felis lobortis. Donec a orci quis ante viverra eleifend ac et quam. Donec imperdiet libero ut justo tincidunt non tristique mauris gravida. Fusce sapien eros, tincidunt a placerat nullam.",
 			};
 
 			// act
@@ -171,6 +169,47 @@ namespace Graylog.Target.Tests
 			// assert
 			jsonObject.Should().NotBeNull();
 			jsonObject.Value<string>("_mdlcItem").Should().Be("value1");
+		}
+
+		/// <summary>
+		/// Test for correct serialization of recursive object in properties.
+		/// </summary>
+		[Test]
+		public void ShouldHandleMessageWithSelfReferenceLoopCorrectly()
+		{
+			// arrange
+			var obj = new TestObject { Text = "Hello world!" };
+			obj.InnerObject = obj;
+			var logEvent = new LogEventInfo
+			{
+				Message = obj.Text,
+				Properties =
+				{
+					{ "test", obj },
+				},
+			};
+
+			// act
+			var jsonObject = new GelfConverter().GetGelfJson(logEvent, "TestFacility", false);
+
+			// assert
+			jsonObject.Should().NotBeNull();
+		}
+
+		/// <summary>
+		/// test object.
+		/// </summary>
+		public class TestObject
+		{
+			/// <summary>
+			/// Text property.
+			/// </summary>
+			public string Text { get; set; }
+
+			/// <summary>
+			/// Object property.
+			/// </summary>
+			public TestObject InnerObject { get; set; }
 		}
 	}
 }

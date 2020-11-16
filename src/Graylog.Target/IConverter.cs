@@ -22,6 +22,6 @@ namespace Graylog.Target
 		/// <param name="facility">Значение настройки facility.</param>
 		/// <param name="includeMdlcProperties">If <c>true</c> include <see cref="MappedDiagnosticsLogicalContext"/> properties into message.</param>
 		/// <returns>Объект для сериализации.</returns>
-		JObject GetGelfJson(LogEventInfo logEventInfo, string facility, bool includeMdlcProperties);
+		JObject GetGelfJson(LogEventInfo logEventInfo, string facility, bool includeMdlcProperties = false);
 	}
 }

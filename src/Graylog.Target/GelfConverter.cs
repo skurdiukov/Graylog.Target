@@ -1,14 +1,10 @@
-#region Usings
-
 using System;
 using System.Collections.Generic;
 using System.Net;
 
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-
 using NLog;
-
-#endregion
 
 namespace Graylog.Target
 {
@@ -40,9 +36,21 @@ namespace Graylog.Target
 			{ LogLevel.Trace, 7 },
 		};
 
-		/// <inheritdoc/>
-		public JObject GetGelfJson(LogEventInfo logEventInfo, string facility, bool includeMdlcProperties)
+		/// <summary>
+		/// Default serializer for object properties.
+		/// </summary>
+		private static readonly JsonSerializer JsonSerializer = new JsonSerializer
 		{
+			NullValueHandling = NullValueHandling.Ignore,
+			ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+		};
+
+		/// <inheritdoc />
+		public JObject GetGelfJson(LogEventInfo logEventInfo, string facility, bool includeMdlcProperties = false)
+		{
+			if (logEventInfo == null)
+				throw new ArgumentNullException(nameof(logEventInfo));
+
 			// Retrieve the formatted message from LogEventInfo
 			var logEventMessage = logEventInfo.FormattedMessage;
 			var properties = new Dictionary<object, object>(logEventInfo.Properties);
@@ -124,7 +132,7 @@ namespace Graylog.Target
 			if (!key.StartsWith("_", StringComparison.Ordinal))
 				key = "_" + key;
 
-			jObject[key] = JToken.FromObject(property.Value);
+			jObject[key] = JToken.FromObject(property.Value, JsonSerializer);
 		}
 
 		/// <summary>
