@@ -1,7 +1,11 @@
 using System;
+using System.Collections.Generic;
 using System.Net;
 
+using BenchmarkDotNet.Attributes;
+using BenchmarkDotNet.Running;
 using FluentAssertions;
+using Moq;
 using Newtonsoft.Json.Linq;
 
 using NLog;
@@ -22,6 +26,7 @@ namespace Graylog.Target.Tests
 		public void ShouldCreateGelfJsonCorrectly()
 		{
 			// arrange
+			var options = Mock.Of<IConvertOptions>(o => o.Facility == "TestFacility");
 			var timestamp = DateTime.Now;
 			var logEvent = new LogEventInfo
 			{
@@ -34,7 +39,7 @@ namespace Graylog.Target.Tests
 			logEvent.Properties.Add("customproperty2", "customvalue2");
 
 			// act
-			var jsonObject = new GelfConverter().GetGelfJson(logEvent, "TestFacility", false);
+			var jsonObject = new GelfConverter().GetGelfJson(logEvent, options);
 
 			// assert
 			jsonObject.Should().NotBeNull();
@@ -45,7 +50,7 @@ namespace Graylog.Target.Tests
 			jsonObject.Value<double>("timestamp").Should().Be(timestamp.ToUnixTimestamp());
 			jsonObject.Value<int>("level").Should().Be(5);
 
-			jsonObject.Value<string>("_facility").Should().Be("TestFacility");
+			jsonObject.Value<string>("_facility").Should().Be(options.Facility);
 			jsonObject.Value<string>("_customproperty1").Should().Be("customvalue1");
 			jsonObject.Value<string>("_customproperty2").Should().Be("customvalue2");
 			jsonObject.Value<string>("_LoggerName").Should().Be("GelfConverterTestLogger");
@@ -61,6 +66,7 @@ namespace Graylog.Target.Tests
 		public void ShouldHandleExceptionsCorrectly()
 		{
 			// arrange
+			var options = Mock.Of<IConvertOptions>(o => o.Facility == "TestFacility");
 			var logEvent = new LogEventInfo
 			{
 				Message = "Test Message",
@@ -68,14 +74,14 @@ namespace Graylog.Target.Tests
 			};
 
 			// act
-			var jsonObject = new GelfConverter().GetGelfJson(logEvent, "TestFacility", false);
+			var jsonObject = new GelfConverter().GetGelfJson(logEvent, options);
 
 			// assert
 			jsonObject.Should().NotBeNull();
 			jsonObject.Value<string>("short_message").Should().Be("Test Message");
 			jsonObject.Value<string>("full_message").Should().Be("Test Message");
 			jsonObject.Value<int>("level").Should().Be(3);
-			jsonObject.Value<string>("_facility").Should().Be("TestFacility");
+			jsonObject.Value<string>("_facility").Should().Be(options.Facility);
 			jsonObject.Value<string>("_ExceptionSource").Should().Be(null);
 			jsonObject.Value<string>("_Exception.0.Type").Should().Be(typeof(DivideByZeroException).FullName);
 			jsonObject.Value<string>("_Exception.0.Message").Should().Be("div by 0");
@@ -97,7 +103,7 @@ namespace Graylog.Target.Tests
 			};
 
 			// act
-			var jsonObject = new GelfConverter().GetGelfJson(logEvent, "TestFacility", false);
+			var jsonObject = new GelfConverter().GetGelfJson(logEvent, Mock.Of<IConvertOptions>());
 
 			// assert
 			jsonObject.Should().NotBeNull();
@@ -119,7 +125,7 @@ namespace Graylog.Target.Tests
 			};
 
 			// act
-			var jsonObject = new GelfConverter().GetGelfJson(logEvent, "TestFacility", false);
+			var jsonObject = new GelfConverter().GetGelfJson(logEvent, Mock.Of<IConvertOptions>());
 
 			// assert
 			jsonObject.Should().NotBeNull();
@@ -140,8 +146,8 @@ namespace Graylog.Target.Tests
 			};
 
 			// act
-			var jsonObject1 = new GelfConverter().GetGelfJson(logEvent, "TestFacility", false);
-			var jsonObject2 = new GelfConverter().GetGelfJson(logEvent, "TestFacility", false);
+			var jsonObject1 = new GelfConverter().GetGelfJson(logEvent, Mock.Of<IConvertOptions>());
+			var jsonObject2 = new GelfConverter().GetGelfJson(logEvent, Mock.Of<IConvertOptions>());
 
 			// assert
 			jsonObject1.Should().BeEquivalentTo(jsonObject2);
@@ -163,7 +169,7 @@ namespace Graylog.Target.Tests
 			JObject jsonObject;
 			using (MappedDiagnosticsLogicalContext.SetScoped("mdlcItem", "value1"))
 			{
-				jsonObject = new GelfConverter().GetGelfJson(logEvent, "TestFacility", true);
+				jsonObject = new GelfConverter().GetGelfJson(logEvent, Mock.Of<IConvertOptions>(o => o.IncludeMdlcProperties));
 			}
 
 			// assert
@@ -190,10 +196,219 @@ namespace Graylog.Target.Tests
 			};
 
 			// act
-			var jsonObject = new GelfConverter().GetGelfJson(logEvent, "TestFacility", false);
+			var jsonObject = new GelfConverter().GetGelfJson(logEvent, Mock.Of<IConvertOptions>(o => o.SerializeObjectProperties));
 
 			// assert
 			jsonObject.Should().NotBeNull();
+		}
+
+		/// <summary>
+		/// Test for correct serialization of object in properties, if option <see cref="IConvertOptions.SerializeObjectProperties"/> is enabled.
+		/// </summary>
+		[Test]
+		public void ShouldSerializeObjectsWhenEnabled()
+		{
+			// arrange
+			var obj = new TestObject { Text = "Hello world!" };
+			obj.InnerObject = obj;
+			var logEvent = new LogEventInfo
+			{
+				Message = obj.Text,
+				Properties =
+				{
+					{ "test", obj },
+				},
+			};
+
+			// act
+			var jsonObject = new GelfConverter().GetGelfJson(logEvent, Mock.Of<IConvertOptions>(o => o.SerializeObjectProperties));
+
+			// assert
+			jsonObject["_test"] !["Text"] !.Value<string>().Should().Be(obj.Text);
+		}
+
+		/// <summary>
+		/// Test for skip serialization of object in properties, if <see cref="IConvertOptions.SerializeObjectProperties"/> option is disabled.
+		/// </summary>
+		[Test]
+		public void ShouldNotSerializeObjectsWhenDisabled()
+		{
+			// arrange
+			var obj = new TestObject { Text = "Hello world!" };
+			obj.InnerObject = obj;
+			var logEvent = new LogEventInfo
+			{
+				Message = obj.Text,
+				Properties =
+				{
+					{ "test", obj },
+				},
+			};
+
+			// act
+			var jsonObject = new GelfConverter().GetGelfJson(logEvent, Mock.Of<IConvertOptions>(o => !o.SerializeObjectProperties));
+
+			// assert
+			jsonObject["_test"].Should().BeNull();
+		}
+
+		/// <summary>
+		/// Test for skip serialization of object in properties, if <see cref="IConvertOptions.SerializeObjectProperties"/> option is disabled.
+		/// </summary>
+		/// <param name="serializeObjectProperties"><see cref="IConvertOptions.SerializeObjectProperties"/> value.</param>
+		[TestCase(true)]
+		[TestCase(false)]
+		public void NullPropertiesShouldNotSerialize(bool serializeObjectProperties)
+		{
+			// arrange
+			var logEvent = new LogEventInfo
+			{
+				Message = "Some text",
+				Properties =
+				{
+					{ "test", null },
+				},
+			};
+
+			// act
+			var jsonObject = new GelfConverter().GetGelfJson(logEvent, Mock.Of<IConvertOptions>(o => o.SerializeObjectProperties == serializeObjectProperties));
+
+			// assert
+			jsonObject.Should().NotBeNull();
+			jsonObject["_test"].Should().BeNull();
+		}
+
+		/// <summary>
+		/// Run benchmarks.
+		/// </summary>
+		[Test]
+		[Ignore("Benchmarks")]
+		public void RunBenchmarks()
+		{
+			BenchmarkRunner.Run<Benchmark>();
+		}
+
+		/// <summary>
+		/// Benchmark fixture.
+		/// </summary>
+		public class Benchmark
+		{
+			/// <summary>
+			/// Tries count.
+			/// </summary>
+			private const int TriesCount = 10_000;
+
+			/// <summary>
+			/// Create JSON property from string using JValue constructor.
+			/// </summary>
+			[Benchmark(Description = "Create JSON property from string using new method")]
+			public void StringWithNewMethod()
+			{
+				var obj = new JObject();
+				var property = new KeyValuePair<object, object>("key", Guid.NewGuid().ToString());
+				for (var i = 0; i < TriesCount; i++)
+				{
+					GelfConverter.AddAdditionalField(obj, property, true);
+				}
+			}
+
+			/// <summary>
+			/// Create JSON property from using FromObject method.
+			/// </summary>
+			[Benchmark(Description = "Create JSON property from string using old method")]
+			public void StringWithOldMethod()
+			{
+				var obj = new JObject();
+				var property = new KeyValuePair<object, object>("key", Guid.NewGuid().ToString());
+				for (var i = 0; i < TriesCount; i++)
+				{
+					AddAdditionalFieldUsingJTokenFromObject(obj, property);
+				}
+			}
+
+			/// <summary>
+			/// Create JSON property from long using JValue constructor.
+			/// </summary>
+			[Benchmark(Description = "Create JSON property from long using new method")]
+			public void LongWithNewMethod()
+			{
+				var obj = new JObject();
+				var property = new KeyValuePair<object, object>("key", 42L);
+				for (var i = 0; i < TriesCount; i++)
+				{
+					GelfConverter.AddAdditionalField(obj, property, true);
+				}
+			}
+
+			/// <summary>
+			/// Create JSON property from long using FromObject method.
+			/// </summary>
+			[Benchmark(Description = "Create JSON property from long using old method")]
+			public void LongWithOldMethod()
+			{
+				var obj = new JObject();
+				var property = new KeyValuePair<object, object>("key", 42L);
+				for (var i = 0; i < TriesCount; i++)
+				{
+					AddAdditionalFieldUsingJTokenFromObject(obj, property);
+				}
+			}
+
+			/// <summary>
+			/// Create JSON property from object using JValue constructor.
+			/// </summary>
+			[Benchmark(Description = "Create JSON property from object using new method")]
+			public void ObjectWithNewMethod()
+			{
+				var obj = new JObject();
+				var value = new TestObject
+				{
+					Text = Guid.NewGuid().ToString(),
+				};
+
+				var property = new KeyValuePair<object, object>("key", value);
+				for (var i = 0; i < TriesCount; i++)
+				{
+					GelfConverter.AddAdditionalField(obj, property, true);
+				}
+			}
+
+			/// <summary>
+			/// Create JSON property from object using JValue constructor.
+			/// </summary>
+			[Benchmark(Description = "Create JSON property from object using old method")]
+			public void ObjectWithOldMethod()
+			{
+				var obj = new JObject();
+				var value = new TestObject
+				{
+					Text = Guid.NewGuid().ToString(),
+				};
+
+				var property = new KeyValuePair<object, object>("key", value);
+				for (var i = 0; i < TriesCount; i++)
+				{
+					AddAdditionalFieldUsingJTokenFromObject(obj, property);
+				}
+			}
+
+			/// <summary>
+			/// Add additional field like in 1.4.0 version.
+			/// </summary>
+			/// <param name="jObject"><see cref="JObject"/> to patch.</param>
+			/// <param name="property">Adding property.</param>
+			private static void AddAdditionalFieldUsingJTokenFromObject(
+				JObject jObject,
+				KeyValuePair<object, object> property)
+			{
+				if (!(property.Key is string key) || property.Value == null) return;
+
+				// According to the GELF spec, additional field keys should start with '_' to avoid collision
+				if (!key.StartsWith("_", StringComparison.Ordinal))
+					key = "_" + key;
+
+				jObject[key] = JToken.FromObject(property.Value, GelfConverter.JsonSerializer);
+			}
 		}
 
 		/// <summary>

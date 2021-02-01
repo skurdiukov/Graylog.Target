@@ -48,6 +48,8 @@ Options are the following:
 * __hostip:__ IP address or hostname of the GrayLog2 server
 * __hostport:__ Port number that GrayLog2 server is listening on
 * __facility:__ The graylog2 facility to send log messages
+* __includeMdlcProperties:__ If `true` - includes [NLog.MappedDiagnosticsLogicalContext](https://github.com/NLog/NLog/blob/dev/src/NLog/Contexts/MappedDiagnosticsLogicalContext.cs) properties in logging properties.
+* __serializeObjectProperties:__ If `true` - allows to include objects in logging properties. Not recommended for high performance apps.
 
 ### Code
 

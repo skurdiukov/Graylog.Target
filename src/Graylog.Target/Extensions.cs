@@ -6,7 +6,7 @@ namespace Graylog.Target
 	/// <summary>
 	/// Расширения для работы с датами.
 	/// </summary>
-	internal static class Extentions
+	internal static class Extensions
 	{
 		/// <summary>
 		/// Начало эпохи Unix.

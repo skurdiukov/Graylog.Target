@@ -2,6 +2,19 @@
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.0]
+### Added
+- Option for switching objects serialization as logging properties.
+- Some benchmarks.
+### Changed
+- Fixed ConsoleRunner.
+
+## [1.4.0]
+### Changed
+- Updated dependencies.
+- Fixed bug with loop reference in property value.
+- No longer support .NET 4.5.
+
 ## [1.3.0]
 ### Added
 - `MappedDiagnosticsLogicalContext` can be included into message if `IncludeMdlcProperties` set.

@@ -14,6 +14,15 @@ namespace Graylog.Target
 	public class GelfConverter : IConverter
 	{
 		/// <summary>
+		/// Default serializer for object properties.
+		/// </summary>
+		internal static readonly JsonSerializer JsonSerializer = new JsonSerializer
+		{
+			NullValueHandling = NullValueHandling.Ignore,
+			ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+		};
+
+		/// <summary>
 		/// Максимальная длина короткого сообщения.
 		/// </summary>
 		private const int ShortMessageMaxLength = 250;
@@ -36,26 +45,20 @@ namespace Graylog.Target
 			{ LogLevel.Trace, 7 },
 		};
 
-		/// <summary>
-		/// Default serializer for object properties.
-		/// </summary>
-		private static readonly JsonSerializer JsonSerializer = new JsonSerializer
-		{
-			NullValueHandling = NullValueHandling.Ignore,
-			ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
-		};
-
 		/// <inheritdoc />
-		public JObject GetGelfJson(LogEventInfo logEventInfo, string facility, bool includeMdlcProperties = false)
+		public JObject GetGelfJson(LogEventInfo logEventInfo, IConvertOptions options)
 		{
 			if (logEventInfo == null)
 				throw new ArgumentNullException(nameof(logEventInfo));
+
+			if (options == null)
+				throw new ArgumentNullException(nameof(options));
 
 			// Retrieve the formatted message from LogEventInfo
 			var logEventMessage = logEventInfo.FormattedMessage;
 			var properties = new Dictionary<object, object>(logEventInfo.Properties);
 
-			if (includeMdlcProperties)
+			if (options.IncludeMdlcProperties)
 			{
 				foreach (var propertyName in MappedDiagnosticsLogicalContext.GetNames())
 				{
@@ -108,12 +111,12 @@ namespace Graylog.Target
 
 			// Add any other interesting data to LogEventInfo properties
 			properties["LoggerName"] = logEventInfo.LoggerName;
-			properties["facility"] = facility;
+			properties["facility"] = options.Facility;
 
 			// We will persist them "Additional Fields" according to Gelf spec
 			foreach (var property in properties)
 			{
-				AddAdditionalField(jsonObject, property);
+				AddAdditionalField(jsonObject, property, options.SerializeObjectProperties);
 			}
 
 			return jsonObject;
@@ -124,7 +127,11 @@ namespace Graylog.Target
 		/// </summary>
 		/// <param name="jObject">Объект к которому будут добавлены поля.</param>
 		/// <param name="property">Добавляемое свойство.</param>
-		private static void AddAdditionalField(JObject jObject, KeyValuePair<object, object> property)
+		/// <param name="serializeObjectProperties">If <c>true</c> - try include any specified object properties into message.</param>
+		internal static void AddAdditionalField(
+			JObject jObject,
+			KeyValuePair<object, object> property,
+			bool serializeObjectProperties)
 		{
 			if (!(property.Key is string key) || property.Value == null) return;
 
@@ -132,7 +139,51 @@ namespace Graylog.Target
 			if (!key.StartsWith("_", StringComparison.Ordinal))
 				key = "_" + key;
 
-			jObject[key] = JToken.FromObject(property.Value, JsonSerializer);
+			JToken value = GetJValue(property.Value);
+
+			if (value == null && serializeObjectProperties)
+			{
+				value = JToken.FromObject(property.Value, JsonSerializer);
+			}
+
+			if (value != null)
+			{
+				jObject[key] = value;
+			}
+		}
+
+		/// <summary>
+		/// Get <see cref="JValue"/> if value has known type, else <c>null</c>.
+		/// </summary>
+		/// <param name="value">Source value.</param>
+		/// <returns>Resolved <see cref="JValue"/> object.</returns>
+		private static JValue GetJValue(object value)
+		{
+			return value switch
+			{
+				null => JValue.CreateNull(),
+				string s => JValue.CreateString(s),
+				long l => new JValue(l),
+				int i => new JValue(i),
+				short s => new JValue(s),
+				sbyte sb => new JValue(sb),
+				ulong ul => new JValue(ul),
+				uint ui => new JValue(ui),
+				ushort us => new JValue(us),
+				byte b => new JValue(b),
+				Enum e => new JValue(e),
+				double d => new JValue(d),
+				float f => new JValue(f),
+				decimal dec => new JValue(dec),
+				DateTime dt => new JValue(dt),
+				DateTimeOffset dto => new JValue(dto),
+				byte[] bs => new JValue(bs),
+				bool b => new JValue(b),
+				Guid g => new JValue(g),
+				Uri u => new JValue(u),
+				TimeSpan t => new JValue(t),
+				_ => null,
+			};
 		}
 
 		/// <summary>
