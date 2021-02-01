@@ -11,7 +11,7 @@ namespace Graylog.Target
 	/// NLog target implementation.
 	/// </summary>
 	[Target("Graylog")]
-	public class GraylogTarget : TargetWithLayout
+	public class GraylogTarget : TargetWithLayout, IConvertOptions
 	{
 		/// <summary>
 		/// Create new instance of <see cref="GraylogTarget"/> class.
@@ -54,6 +54,11 @@ namespace Graylog.Target
 		public bool IncludeMdlcProperties { get; set; }
 
 		/// <summary>
+		/// If <c>true</c> include object properties into message.
+		/// </summary>
+		public bool SerializeObjectProperties { get; set; }
+
+		/// <summary>
 		/// Message converter.
 		/// </summary>
 		public IConverter Converter { get; }
@@ -78,9 +83,9 @@ namespace Graylog.Target
 		/// <param name="logEvent">Log event to be written out.</param>
 		protected override void Write(LogEventInfo logEvent)
 		{
-			var jsonObject = Converter.GetGelfJson(logEvent, Facility, IncludeMdlcProperties);
+			var jsonObject = Converter.GetGelfJson(logEvent, this);
 			if (jsonObject == null) return;
-			Transport.Send(HostIp, HostPort, jsonObject.ToString(Formatting.None, null));
+			Transport.Send(HostIp, HostPort, jsonObject.ToString(Formatting.None, null!));
 		}
 	}
 }

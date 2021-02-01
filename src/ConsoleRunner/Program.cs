@@ -3,7 +3,6 @@
 using System;
 using System.IO;
 using System.Threading;
-
 using LumenWorks.Framework.IO.Csv;
 
 using NLog;
@@ -25,9 +24,9 @@ namespace ConsoleRunner
 
 				var eventInfo = new LogEventInfo
 				{
-					TimeStamp = DateTime.Now, 
-					Message = comic.Title, 
-					Level = LogLevel.Info, 
+					TimeStamp = DateTime.Now,
+					Message = comic.Title,
+					Level = LogLevel.Info,
 				};
 				eventInfo.Properties.Add("Publisher", comic.Publisher);
 				eventInfo.Properties.Add("ReleaseDate", comic.ReleaseDate);
@@ -50,17 +49,16 @@ namespace ConsoleRunner
 		private static Comic GetNextComic()
 		{
 			var nextComicIndex = Random.Next(1, 400);
-
-			using (var csv = new CsvReader(new StreamReader("comics.csv"), false))
+			using var csv = new CsvReader(new StreamReader("comics.csv"), false);
+			
+			csv.MoveTo(nextComicIndex);
+			
+			return new Comic
 			{
-				csv.MoveTo(nextComicIndex);
-				return new Comic
-				{
-					Title = csv[2], 
-					Publisher = csv[1], 
-					ReleaseDate = csv[0]
-				};
-			}
+				Title = csv[2],
+				Publisher = csv[1],
+				ReleaseDate = csv[0]
+			};
 		}
 
 		internal class Comic
