@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFrameworks>netstandard2.0;net461</TargetFrameworks>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <CodeAnalysisRuleSet>..\..\build\Analyzers.ruleset</CodeAnalysisRuleSet>
     <SignAssembly>true</SignAssembly>
@@ -12,7 +12,7 @@
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/skurdiukov/Graylog.Target.git</RepositoryUrl>
     <Description>GELF 1.1 UDP target</Description>
-    <Version>1.5.0</Version>
+    <Version>1.5.1</Version>
     <BuildNumber Condition=" '$(BuildNumber)' == '' ">0</BuildNumber>
     <AssemblyVersion>1.0.0.0</AssemblyVersion>
     <FileVersion>$(Version).$(BuildNumber)</FileVersion>
@@ -23,7 +23,7 @@
     <LangVersion>8.0</LangVersion>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="3.3.1">
+    <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="5.0.3">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
