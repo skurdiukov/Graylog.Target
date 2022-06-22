@@ -60,13 +60,16 @@ namespace Graylog.Target
 
 			if (options.IncludeMdlcProperties)
 			{
-				foreach (var propertyName in MappedDiagnosticsLogicalContext.GetNames())
+				foreach (var property in ScopeContext.GetAllProperties())
 				{
-					properties[propertyName] = MappedDiagnosticsLogicalContext.GetObject(propertyName);
+					properties[property.Key] = property.Value;
 				}
 			}
 
-			if (logEventMessage == null) return null;
+			if (logEventMessage == null)
+			{
+				return null;
+			}
 
 			// If we are dealing with an exception, pass exception properties to LogEventInfo properties
 			var exception = logEventInfo.Exception;

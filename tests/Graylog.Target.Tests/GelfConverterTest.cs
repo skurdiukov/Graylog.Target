@@ -167,7 +167,7 @@ namespace Graylog.Target.Tests
 
 			// act
 			JObject jsonObject;
-			using (MappedDiagnosticsLogicalContext.SetScoped("mdlcItem", "value1"))
+			using (ScopeContext.PushProperty("mdlcItem", "value1"))
 			{
 				jsonObject = new GelfConverter().GetGelfJson(logEvent, Mock.Of<IConvertOptions>(o => o.IncludeMdlcProperties));
 			}
