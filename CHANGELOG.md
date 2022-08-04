@@ -2,6 +2,12 @@
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.1]
+### Changed
+- Readded support for .NET 4.6.2
+- Downgraded to support netstandard2.0
+- Utilizing latest C# language version
+
 ## [1.6.0]
 ### Changed
 - Package `NLog` updated to version `5.0.1`
